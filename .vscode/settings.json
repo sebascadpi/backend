@@ -1,0 +1,20 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit",
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.stylelint": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "css.validate": false,
+  "scss.validate": false,
+  "stylelint.validate": ["css", "scss"],
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "svg.preview.background": "transparent",
+  "cSpell.language": "en,es-ES",
+  "typescript.suggest.autoImports": true,
+  "typescript.suggest.enabled": true,
+  "typescript.tsserver.web.projectWideIntellisense.enabled": true,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  "typescript.tsserver.log": "verbose"
+}
