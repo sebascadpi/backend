@@ -12,11 +12,6 @@ const SessionData = require("./session-data")(sequelize, DataTypes);
 
 // Define associations
 CsvFile.hasMany(SessionData);
-CsvFile.hasMany(Position);
-CsvFile.hasMany(Rotation);
-
-Position.belongsTo(CsvFile);
-Rotation.belongsTo(CsvFile);
 SessionData.belongsTo(CsvFile);
 
 module.exports = {

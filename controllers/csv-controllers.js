@@ -1,4 +1,4 @@
-const { CsvFile } = require("../models");
+const { CsvFile, SessionData, Position, Rotation } = require("../models");
 const { saveRow } = require("../services/csv-service");
 const fs = require("fs");
 const csvParser = require("csv-parser");
@@ -63,21 +63,126 @@ exports.uploadCsv = async (req, res) => {
 
 exports.getFiles = async (req, res) => {
   try {
-    const files = await CsvFile.findAll();
-    res.json(files);
+    const files = await CsvFile.findAll({
+      include: [
+        {
+          model: SessionData,
+          attributes: ["time", "objectPut", "totalErrors"],
+          order: [["rowIndex", "ASC"]],
+        },
+      ],
+    });
+
+    const transformedFiles = files.map((file) => {
+      const fileData = file.toJSON();
+
+      // Calculate total time from the last SessionData entry
+      const lastSession = fileData.SessionData[fileData.SessionData.length - 1];
+      const totalTime = lastSession ? lastSession.time : "0:0:0";
+
+      // objectPut and totalErrors
+      const totalErrors =
+        fileData.SessionData[fileData.SessionData.length - 1].totalErrors || 0;
+      const totalObjectsPut =
+        fileData.SessionData[fileData.SessionData.length - 1].objectPut || 0;
+
+      return {
+        id: fileData.id,
+        fileName: fileData.fileName,
+        totalTime,
+        totalObjectsPut,
+        totalErrors,
+        createdAt: fileData.createdAt,
+        updatedAt: fileData.updatedAt,
+      };
+    });
+
+    res.json(transformedFiles);
   } catch (error) {
+    console.error("Error fetching files:", error);
     res.status(500).send("Error fetching files");
   }
 };
 
 exports.getFileById = async (req, res) => {
   try {
-    const file = await CsvFile.findByPk(req.params.id);
-    if (!file) {
-      return res.status(404).send("File not found");
-    }
-    res.json(file);
+    const file = await CsvFile.findByPk(req.params.id, {
+      include: [
+        {
+          model: SessionData,
+          // attributes: [
+          //   "time",
+          //   "objectPut",
+          //   "totalErrors",
+          //   "rightHandObject",
+          //   "leftHandObject",
+          // ],
+          order: [["rowIndex", "ASC"]],
+        },
+      ],
+    });
+    if (!file) return res.status(404).send("File not found");
+    // console.log("File found:", file.toJSON());
+
+    const parsedFile = file.toJSON();
+
+    const experimentData = parsedFile.SessionData.map((data) => {
+      // Positions
+      const {
+        rightHandPosX,
+        rightHandPosY,
+        rightHandPosZ,
+        leftHandPosX,
+        leftHandPosY,
+        leftHandPosZ,
+        headPosX,
+        headPosY,
+        headPosZ,
+        eyeTrackerPosX,
+        eyeTrackerPosY,
+        eyeTrackerPosZ,
+        eyeTrackerDirX,
+        eyeTrackerDirY,
+        eyeTrackerDirZ,
+        rightHandRotPitch,
+        rightHandRotYaw,
+        rightHandRotRoll,
+        leftHandRotPitch,
+        leftHandRotYaw,
+        leftHandRotRoll,
+        headRotPitch,
+        headRotYaw,
+        headRotRoll,
+        ...rest
+      } = data;
+
+      return {
+        ...rest,
+        // Positions
+        rightHandPos: `X=${rightHandPosX}, Y=${rightHandPosY}, Z=${rightHandPosZ}`,
+        leftHandPos: `X=${leftHandPosX}, Y=${leftHandPosY}, Z=${leftHandPosZ}`,
+        headPos: `X=${headPosX}, Y=${headPosY}, Z=${headPosZ}`,
+        eyeTrackerPos: `X=${eyeTrackerPosX}, Y=${eyeTrackerPosY}, Z=${eyeTrackerPosZ}`,
+        eyeTrackerDir: `X=${eyeTrackerDirX}, Y=${eyeTrackerDirY}, Z=${eyeTrackerDirZ}`,
+
+        // Rotations
+        rightHandRot: `P=${rightHandRotPitch}, Y=${rightHandRotYaw}, R=${rightHandRotRoll}`,
+        leftHandRot: `P=${leftHandRotPitch}, Y=${leftHandRotYaw}, R=${leftHandRotRoll}`,
+        headRot: `P=${headRotPitch}, Y=${headRotYaw}, R=${headRotRoll}`,
+      };
+    });
+
+    const fileData = {
+      id: parsedFile.id,
+      fileName: parsedFile.fileName,
+      createdAt: parsedFile.createdAt,
+      updatedAt: parsedFile.updatedAt,
+      experimentData,
+    };
+
+    res.json(fileData);
   } catch (error) {
+    console.error("Error fetching file:", error);
     res.status(500).send("Error fetching file");
   }
 };

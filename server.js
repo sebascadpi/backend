@@ -7,11 +7,11 @@ const app = express();
 const port = 3000;
 
 app.use(cors());
-app.use("/api/csv", csvRoutes);
+app.use("/api/experiments", csvRoutes);
 
 const initializeServer = async () => {
   try {
-    await sequelize.sync({ force: true });
+    await sequelize.sync();
     console.log("Database initialized");
 
     app.listen(port, () => {

@@ -1,9 +1,8 @@
-const { SessionData, Position, Rotation } = require("../models");
+const { SessionData } = require("../models");
 const { parseXYZ, parsePYR } = require("../utils/parse");
 
 exports.saveRow = async (CsvFileId, rowIndex, rowData) => {
   try {
-    // Crear entrada de sesión
     await SessionData.create({
       time: rowData.Time,
       rightHandObject: rowData.RightHandObject,
@@ -12,63 +11,19 @@ exports.saveRow = async (CsvFileId, rowIndex, rowData) => {
       totalErrors: rowData.TotalErrors,
       rowIndex,
       CsvFileId,
+
+      // Positions
+      ...parseXYZ("rightHandPos", rowData.RightHandPos),
+      ...parseXYZ("leftHandPos", rowData.LeftHandPos),
+      ...parseXYZ("headPos", rowData.HeadPos),
+      ...parseXYZ("eyeTrackerPos", rowData.EyeTrackerPos),
+      ...parseXYZ("eyeTrackerDir", rowData.EyeTrackerDir),
+
+      // Rotations
+      ...parsePYR("rightHandRot", rowData.RightHandRot),
+      ...parsePYR("leftHandRot", rowData.LeftHandRot),
+      ...parsePYR("headRot", rowData.HeadRot),
     });
-
-    // Guardar posiciones
-    await Position.bulkCreate([
-      {
-        type: "RightHand",
-        ...parseXYZ(rowData.RightHandPos),
-        rowIndex,
-        CsvFileId,
-      },
-      {
-        type: "LeftHand",
-        ...parseXYZ(rowData.LeftHandPos),
-        rowIndex,
-        CsvFileId,
-      },
-      {
-        type: "Head",
-        ...parseXYZ(rowData.HeadPos),
-        rowIndex,
-        CsvFileId,
-      },
-      {
-        type: "EyeTrackerPos",
-        ...parseXYZ(rowData.EyeTrackerPos),
-        rowIndex,
-        CsvFileId,
-      },
-      {
-        type: "EyeTrackerDir",
-        ...parseXYZ(rowData.EyeTrackerDir),
-        rowIndex,
-        CsvFileId,
-      },
-    ]);
-
-    // Guardar rotaciones
-    await Rotation.bulkCreate([
-      {
-        type: "RightHand",
-        ...parsePYR(rowData.RightHandRot),
-        rowIndex,
-        CsvFileId,
-      },
-      {
-        type: "LeftHand",
-        ...parsePYR(rowData.LeftHandRot),
-        rowIndex,
-        CsvFileId,
-      },
-      {
-        type: "Head",
-        ...parsePYR(rowData.HeadRot),
-        rowIndex,
-        CsvFileId,
-      },
-    ]);
 
     return true;
   } catch (error) {

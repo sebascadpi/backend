@@ -1,13 +1,13 @@
-exports.parseXYZ = (coordString) => {
+exports.parseXYZ = (posType, coordString) => {
   const coords = {};
   coordString.split(" ").forEach((part) => {
     const [key, value] = part.split("=");
-    coords[key.toLowerCase()] = parseFloat(value);
+    coords[posType + key] = parseFloat(value);
   });
   return coords;
 };
 
-exports.parsePYR = (rotString) => {
+exports.parsePYR = (rotType, rotString) => {
   const rotations = {
     pitch: 0,
     yaw: 0,
@@ -28,6 +28,11 @@ exports.parsePYR = (rotString) => {
         break;
     }
   });
+  const mappedRotations = {
+    [rotType + "Pitch"]: rotations.pitch,
+    [rotType + "Yaw"]: rotations.yaw,
+    [rotType + "Roll"]: rotations.roll,
+  };
 
-  return rotations;
+  return mappedRotations;
 };
