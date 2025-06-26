@@ -153,22 +153,28 @@ exports.getFileById = async (req, res) => {
         headRotPitch,
         headRotYaw,
         headRotRoll,
+        rightHandObject,
+        leftHandObject,
         ...rest
       } = data;
 
       return {
         ...rest,
+        // Hand Objects
+        rightHandObject: rightHandObject === "None" ? null : rightHandObject,
+        leftHandObject: leftHandObject === "None" ? null : leftHandObject,
+
         // Positions
-        rightHandPos: `X=${rightHandPosX}, Y=${rightHandPosY}, Z=${rightHandPosZ}`,
-        leftHandPos: `X=${leftHandPosX}, Y=${leftHandPosY}, Z=${leftHandPosZ}`,
-        headPos: `X=${headPosX}, Y=${headPosY}, Z=${headPosZ}`,
-        eyeTrackerPos: `X=${eyeTrackerPosX}, Y=${eyeTrackerPosY}, Z=${eyeTrackerPosZ}`,
-        eyeTrackerDir: `X=${eyeTrackerDirX}, Y=${eyeTrackerDirY}, Z=${eyeTrackerDirZ}`,
+        rightHandPos: `X=${rightHandPosX} Y=${rightHandPosY} Z=${rightHandPosZ}`,
+        leftHandPos: `X=${leftHandPosX} Y=${leftHandPosY} Z=${leftHandPosZ}`,
+        headPos: `X=${headPosX} Y=${headPosY} Z=${headPosZ}`,
+        eyeTrackerPos: `X=${eyeTrackerPosX} Y=${eyeTrackerPosY} Z=${eyeTrackerPosZ}`,
+        eyeTrackerDir: `X=${eyeTrackerDirX} Y=${eyeTrackerDirY} Z=${eyeTrackerDirZ}`,
 
         // Rotations
-        rightHandRot: `P=${rightHandRotPitch}, Y=${rightHandRotYaw}, R=${rightHandRotRoll}`,
-        leftHandRot: `P=${leftHandRotPitch}, Y=${leftHandRotYaw}, R=${leftHandRotRoll}`,
-        headRot: `P=${headRotPitch}, Y=${headRotYaw}, R=${headRotRoll}`,
+        rightHandRot: `P=${rightHandRotPitch} Y=${rightHandRotYaw} R=${rightHandRotRoll}`,
+        leftHandRot: `P=${leftHandRotPitch} Y=${leftHandRotYaw} R=${leftHandRotRoll}`,
+        headRot: `P=${headRotPitch} Y=${headRotYaw} R=${headRotRoll}`,
       };
     });
 
