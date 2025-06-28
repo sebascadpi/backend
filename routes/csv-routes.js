@@ -8,5 +8,6 @@ const upload = multer({ dest: "uploads/" });
 router.post("/upload", upload.single("csvFile"), csvController.uploadCsv);
 router.get("/", csvController.getFiles);
 router.get("/:id", csvController.getFileById);
+router.get("/:id/view", csvController.getFileViewById);
 
 module.exports = router;

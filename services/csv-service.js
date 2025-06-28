@@ -1,5 +1,5 @@
 const { SessionData } = require("../models");
-const { parseXYZ, parsePYR } = require("../utils/parse");
+const { parseXYZ, parsePYR } = require("../utils/parse-coords.utils");
 
 exports.saveRow = async (CsvFileId, rowIndex, rowData) => {
   try {

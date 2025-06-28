@@ -1,7 +1,15 @@
-const { CsvFile, SessionData, Position, Rotation } = require("../models");
+const { CsvFile, SessionData } = require("../models");
 const { saveRow } = require("../services/csv-service");
 const fs = require("fs");
 const csvParser = require("csv-parser");
+const {
+  coordsToXYZ,
+  rotCoordsToPYR,
+  toCoordsObject,
+  toRotCoordsObject,
+} = require("../utils/parse-coords.utils");
+const { OBJECT_COLORS, DEFAULT_COLOR } = require("../constants/object-colors");
+const { timeToMS } = require("../utils/time.utils");
 
 exports.uploadCsv = async (req, res) => {
   try {
@@ -75,16 +83,14 @@ exports.getFiles = async (req, res) => {
 
     const transformedFiles = files.map((file) => {
       const fileData = file.toJSON();
+      const lastSession = fileData.SessionData[fileData.SessionData.length - 1];
 
       // Calculate total time from the last SessionData entry
-      const lastSession = fileData.SessionData[fileData.SessionData.length - 1];
       const totalTime = lastSession ? lastSession.time : "0:0:0";
 
       // objectPut and totalErrors
-      const totalErrors =
-        fileData.SessionData[fileData.SessionData.length - 1].totalErrors || 0;
-      const totalObjectsPut =
-        fileData.SessionData[fileData.SessionData.length - 1].objectPut || 0;
+      const totalErrors = lastSession.totalErrors || 0;
+      const totalObjectsPut = lastSession.objectPut || 0;
 
       return {
         id: fileData.id,
@@ -110,19 +116,11 @@ exports.getFileById = async (req, res) => {
       include: [
         {
           model: SessionData,
-          // attributes: [
-          //   "time",
-          //   "objectPut",
-          //   "totalErrors",
-          //   "rightHandObject",
-          //   "leftHandObject",
-          // ],
           order: [["rowIndex", "ASC"]],
         },
       ],
     });
     if (!file) return res.status(404).send("File not found");
-    // console.log("File found:", file.toJSON());
 
     const parsedFile = file.toJSON();
 
@@ -165,16 +163,32 @@ exports.getFileById = async (req, res) => {
         leftHandObject: leftHandObject === "None" ? null : leftHandObject,
 
         // Positions
-        rightHandPos: `X=${rightHandPosX} Y=${rightHandPosY} Z=${rightHandPosZ}`,
-        leftHandPos: `X=${leftHandPosX} Y=${leftHandPosY} Z=${leftHandPosZ}`,
-        headPos: `X=${headPosX} Y=${headPosY} Z=${headPosZ}`,
-        eyeTrackerPos: `X=${eyeTrackerPosX} Y=${eyeTrackerPosY} Z=${eyeTrackerPosZ}`,
-        eyeTrackerDir: `X=${eyeTrackerDirX} Y=${eyeTrackerDirY} Z=${eyeTrackerDirZ}`,
+        rightHandPos: coordsToXYZ(rightHandPosX, rightHandPosY, rightHandPosZ),
+        leftHandPos: coordsToXYZ(leftHandPosX, leftHandPosY, leftHandPosZ),
+        headPos: coordsToXYZ(headPosX, headPosY, headPosZ),
+        eyeTrackerPos: coordsToXYZ(
+          eyeTrackerPosX,
+          eyeTrackerPosY,
+          eyeTrackerPosZ
+        ),
+        eyeTrackerDir: coordsToXYZ(
+          eyeTrackerDirX,
+          eyeTrackerDirY,
+          eyeTrackerDirZ
+        ),
 
         // Rotations
-        rightHandRot: `P=${rightHandRotPitch} Y=${rightHandRotYaw} R=${rightHandRotRoll}`,
-        leftHandRot: `P=${leftHandRotPitch} Y=${leftHandRotYaw} R=${leftHandRotRoll}`,
-        headRot: `P=${headRotPitch} Y=${headRotYaw} R=${headRotRoll}`,
+        rightHandRot: rotCoordsToPYR(
+          rightHandRotPitch,
+          rightHandRotYaw,
+          rightHandRotRoll
+        ),
+        leftHandRot: rotCoordsToPYR(
+          leftHandRotPitch,
+          leftHandRotYaw,
+          leftHandRotRoll
+        ),
+        headRot: rotCoordsToPYR(headRotPitch, headRotYaw, headRotRoll),
       };
     });
 
@@ -183,6 +197,181 @@ exports.getFileById = async (req, res) => {
       fileName: parsedFile.fileName,
       createdAt: parsedFile.createdAt,
       updatedAt: parsedFile.updatedAt,
+      experimentData,
+    };
+
+    res.json(fileData);
+  } catch (error) {
+    console.error("Error fetching file:", error);
+    res.status(500).send("Error fetching file");
+  }
+};
+
+exports.getFileViewById = async (req, res) => {
+  try {
+    const file = await CsvFile.findByPk(req.params.id, {
+      include: [
+        {
+          model: SessionData,
+          order: [["rowIndex", "ASC"]],
+        },
+      ],
+    });
+    if (!file) return res.status(404).send("File not found");
+    const parsedFile = file.toJSON();
+
+    const objectFirstAppearance = new Map();
+
+    // Recorrer todos los datos de sesión para encontrar primeras apariciones
+    parsedFile.SessionData.forEach((data) => {
+      // Verificar mano derecha
+      if (
+        data.rightHandObject !== "None" &&
+        !objectFirstAppearance.has(data.rightHandObject)
+      ) {
+        objectFirstAppearance.set(data.rightHandObject, {
+          name: data.rightHandObject,
+          posX: data.rightHandPosX,
+          posY: data.rightHandPosY,
+          posZ: data.rightHandPosZ,
+          rotPitch: data.rightHandRotPitch,
+          rotYaw: data.rightHandRotYaw,
+          rotRoll: data.rightHandRotRoll,
+        });
+      }
+
+      // Verificar mano izquierda
+      if (
+        data.leftHandObject !== "None" &&
+        !objectFirstAppearance.has(data.leftHandObject)
+      ) {
+        objectFirstAppearance.set(data.leftHandObject, {
+          name: data.leftHandObject,
+          posX: data.leftHandPosX,
+          posY: data.leftHandPosY,
+          posZ: data.leftHandPosZ,
+          rotPitch: data.leftHandRotPitch,
+          rotYaw: data.leftHandRotYaw,
+          rotRoll: data.leftHandRotRoll,
+        });
+      }
+    });
+
+    // Crear el array final de experimentObjects
+    const experimentObjects = Array.from(objectFirstAppearance.values()).map(
+      (obj) => {
+        const { rotPitch, rotYaw, rotRoll } = obj;
+        return {
+          name: obj.name,
+          color: OBJECT_COLORS[obj.name] || DEFAULT_COLOR,
+          initialPosition: toCoordsObject(obj.posX, obj.posY, obj.posZ),
+          initialRotation: toRotCoordsObject(rotPitch, rotYaw, rotRoll),
+        };
+      }
+    );
+
+    const lastSession =
+      parsedFile.SessionData[parsedFile.SessionData.length - 1];
+
+    // Calculate total time from the last SessionData entry
+    const totalTime = timeToMS(lastSession ? lastSession.time : "0:0:0");
+
+    const experimentData = parsedFile.SessionData.map((data) => {
+      // Positions
+      const {
+        rightHandPosX,
+        rightHandPosY,
+        rightHandPosZ,
+        leftHandPosX,
+        leftHandPosY,
+        leftHandPosZ,
+        headPosX,
+        headPosY,
+        headPosZ,
+        eyeTrackerPosX,
+        eyeTrackerPosY,
+        eyeTrackerPosZ,
+        eyeTrackerDirX,
+        eyeTrackerDirY,
+        eyeTrackerDirZ,
+        rightHandRotPitch,
+        rightHandRotYaw,
+        rightHandRotRoll,
+        leftHandRotPitch,
+        leftHandRotYaw,
+        leftHandRotRoll,
+        headRotPitch,
+        headRotYaw,
+        headRotRoll,
+        rightHandObject,
+        leftHandObject,
+        time,
+        ...rest
+      } = data;
+
+      const rightHandObjectPos =
+        rightHandObject !== "None"
+          ? toCoordsObject(rightHandPosX, rightHandPosY, rightHandPosZ)
+          : null;
+      const leftHandObjectPos =
+        leftHandObject !== "None"
+          ? toCoordsObject(leftHandPosX, leftHandPosY, leftHandPosZ)
+          : null;
+      const rightHandObjectRot =
+        rightHandObject !== "None"
+          ? toRotCoordsObject(
+              rightHandRotPitch,
+              rightHandRotYaw,
+              rightHandRotRoll
+            )
+          : null;
+      const leftHandObjectRot =
+        leftHandObject !== "None"
+          ? toRotCoordsObject(leftHandRotPitch, leftHandRotYaw, leftHandRotRoll)
+          : null;
+
+      return {
+        ...rest,
+        time,
+        millisecond: timeToMS(time),
+
+        // Hand Objects
+        rightHandObject: rightHandObject === "None" ? null : rightHandObject,
+        leftHandObject: leftHandObject === "None" ? null : leftHandObject,
+
+        // Positions
+        rightHandPos: toCoordsObject(
+          rightHandPosX,
+          rightHandPosY,
+          rightHandPosZ
+        ),
+        rightHandObjectPos,
+        leftHandPos: toCoordsObject(leftHandPosX, leftHandPosY, leftHandPosZ),
+        leftHandObjectPos,
+        headPos: toCoordsObject(headPosX, headPosY, headPosZ),
+
+        // Rotations
+        rightHandRot: toRotCoordsObject(
+          rightHandRotPitch,
+          rightHandRotYaw,
+          rightHandRotRoll
+        ),
+        rightHandObjectRot,
+        leftHandRot: toRotCoordsObject(
+          leftHandRotPitch,
+          leftHandRotYaw,
+          leftHandRotRoll
+        ),
+        leftHandObjectRot,
+        headRot: toRotCoordsObject(headRotPitch, headRotYaw, headRotRoll),
+      };
+    });
+
+    const fileData = {
+      id: parsedFile.id,
+      fileName: parsedFile.fileName,
+      totalTime,
+      objects: experimentObjects,
       experimentData,
     };
 
