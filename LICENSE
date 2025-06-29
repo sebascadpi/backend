@@ -1,0 +1,75 @@
+MIT License
+
+Copyright (c) 2025 Sebastián Cadavid Piñero
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## Third-Party Licenses
+
+This project uses the following open-source packages:
+
+### Express.js
+
+- License: MIT
+- Copyright: TJ Holowaychuk and contributors
+- https://github.com/expressjs/express
+
+### Sequelize
+
+- License: MIT
+- Copyright: Sequelize contributors
+- https://github.com/sequelize/sequelize
+
+### SQLite3
+
+- License: BSD-3-Clause
+- Copyright: MapBox and contributors
+- https://github.com/TryGhost/node-sqlite3
+
+### CORS
+
+- License: MIT
+- Copyright: Troy Goode and contributors
+- https://github.com/expressjs/cors
+
+### CSV-Parser
+
+- License: MIT
+- Copyright: mafintosh and contributors
+- https://github.com/mafintosh/csv-parser
+
+### Multer
+
+- License: MIT
+- Copyright: Express Contributors
+- https://github.com/expressjs/multer
+
+### Cross-env (Dev Dependency)
+
+- License: MIT
+- Copyright: Kent C. Dodds
+- https://github.com/kentcdodds/cross-env
+
+### Jest (Dev Dependency)
+
+- License: MIT
+- Copyright: Meta Platforms, Inc. and affiliates
+- https://github.com/jestjs/jest
