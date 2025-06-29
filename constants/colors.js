@@ -22,6 +22,11 @@ const OBJECT_CHART_COLORS = {
   cracker_box: "#deb887",
 };
 
+const SUCCESS_ERROR_COLORS = {
+  objectPut: "#00ff00",
+  totalErrors: "#ff0000",
+};
+
 const DEFAULT_COLOR = 0xcccccc;
 const DEFAULT_CHART_COLOR = "#cccccc";
 
@@ -30,4 +35,5 @@ module.exports = {
   DEFAULT_COLOR,
   OBJECT_CHART_COLORS,
   DEFAULT_CHART_COLOR,
+  SUCCESS_ERROR_COLORS,
 };

@@ -8,7 +8,7 @@ const {
   toCoordsObject,
   toRotCoordsObject,
 } = require("../utils/coords.utils");
-const { OBJECT_COLORS, DEFAULT_COLOR } = require("../constants/object-colors");
+const { OBJECT_COLORS, DEFAULT_COLOR } = require("../constants/colors");
 const { timeToMS } = require("../utils/time.utils");
 
 exports.uploadExperimentCsv = async (req, res) => {

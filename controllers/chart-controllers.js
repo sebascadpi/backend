@@ -1,7 +1,8 @@
 const {
   OBJECT_CHART_COLORS,
   DEFAULT_CHART_COLOR,
-} = require("../constants/object-colors");
+  SUCCESS_ERROR_COLORS,
+} = require("../constants/colors");
 const { CsvFile, SessionData } = require("../models");
 const {
   getTotalObjectTime,
@@ -9,6 +10,7 @@ const {
   toHistogramSerie,
   mapHandObjectTimeline,
   joinObjectTimelines,
+  mapSuccessesAndErrors,
 } = require("../utils/chart.utils");
 const { timeToSeconds } = require("../utils/time.utils");
 
@@ -54,7 +56,6 @@ exports.getTotalTimePerObject = async (req, res) => {
       data: [
         {
           name: "Tiempo total",
-          type: "bar",
           data,
         },
       ],
@@ -109,6 +110,47 @@ exports.getHandObjectTimeline = async (req, res) => {
     }));
     const colors = series.map(
       ({ name }) => `${OBJECT_CHART_COLORS[name] || DEFAULT_CHART_COLOR}`
+    );
+
+    const fileData = {
+      data: series,
+      colors,
+    };
+
+    res.json(fileData);
+  } catch (error) {
+    console.error("Error fetching file:", error);
+    res.status(500).send("Error fetching file");
+  }
+};
+
+exports.getSuccessesAndErrorsChart = async (req, res) => {
+  try {
+    const file = await CsvFile.findByPk(req.params.id, {
+      include: [
+        {
+          model: SessionData,
+          order: [["rowIndex", "ASC"]],
+        },
+      ],
+    });
+    if (!file) return res.status(404).send("File not found");
+    const parsedFile = file.toJSON();
+
+    const dataWithSeconds = parsedFile.SessionData.map(
+      ({ time, objectPut, totalErrors }) => ({
+        objectPut,
+        totalErrors,
+        second: timeToSeconds(time),
+      })
+    );
+
+    const mappedSuccesses = mapSuccessesAndErrors(dataWithSeconds, "objectPut");
+    const mappedErrors = mapSuccessesAndErrors(dataWithSeconds, "totalErrors");
+
+    const series = [mappedSuccesses, mappedErrors];
+    const colors = series.map(
+      ({ name }) => `${SUCCESS_ERROR_COLORS[name] || DEFAULT_CHART_COLOR}`
     );
 
     const fileData = {

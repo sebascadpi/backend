@@ -51,6 +51,17 @@ exports.mapHandObjectTimeline = (experimentData, objectKey) => {
   return objectTimes;
 };
 
+exports.mapSuccessesAndErrors = (experimentData, key) => {
+  if (!experimentData.length) return [];
+
+  const propertyData = experimentData.map((frame) => ({
+    x: frame.second,
+    y: frame[key] || 0,
+  }));
+
+  return { name: key, data: propertyData };
+};
+
 exports.joinObjectTimes = (leftHandObjectTimes, rightHandObjectTimes) => {
   const combinedTimes = { ...leftHandObjectTimes };
 

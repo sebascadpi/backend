@@ -16,5 +16,6 @@ router.get("/:id", experimentController.getExperimentById);
 router.get("/:id/view", experimentController.getExperimentViewById);
 router.get("/:id/total-time-per-object", chartController.getTotalTimePerObject);
 router.get("/:id/hand-object-timeline", chartController.getHandObjectTimeline);
+router.get("/:id/successes-errors", chartController.getSuccessesAndErrorsChart);
 
 module.exports = router;
