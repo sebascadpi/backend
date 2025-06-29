@@ -7,11 +7,11 @@ const {
   rotCoordsToPYR,
   toCoordsObject,
   toRotCoordsObject,
-} = require("../utils/parse-coords.utils");
+} = require("../utils/coords.utils");
 const { OBJECT_COLORS, DEFAULT_COLOR } = require("../constants/object-colors");
 const { timeToMS } = require("../utils/time.utils");
 
-exports.uploadCsv = async (req, res) => {
+exports.uploadExperimentCsv = async (req, res) => {
   try {
     if (!req.file) return res.status(400).send("No file uploaded.");
 
@@ -69,7 +69,7 @@ exports.uploadCsv = async (req, res) => {
   }
 };
 
-exports.getFiles = async (req, res) => {
+exports.getExperiments = async (req, res) => {
   try {
     const files = await CsvFile.findAll({
       include: [
@@ -110,7 +110,7 @@ exports.getFiles = async (req, res) => {
   }
 };
 
-exports.getFileById = async (req, res) => {
+exports.getExperimentById = async (req, res) => {
   try {
     const file = await CsvFile.findByPk(req.params.id, {
       include: [
@@ -207,7 +207,7 @@ exports.getFileById = async (req, res) => {
   }
 };
 
-exports.getFileViewById = async (req, res) => {
+exports.getExperimentViewById = async (req, res) => {
   try {
     const file = await CsvFile.findByPk(req.params.id, {
       include: [

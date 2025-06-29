@@ -10,9 +10,24 @@ const OBJECT_COLORS = {
   cracker_box: 0xdeb887,
 };
 
-const DEFAULT_COLOR = 0xcccccc; // Color por defecto si no se encuentra el objeto
+const OBJECT_CHART_COLORS = {
+  orange: "#ff8c00",
+  tomato_soup_can: "#dc143c",
+  master_chef_can: "#b8860b",
+  bleach_cleanser: "#87ceeb",
+  banana: "#ffd700",
+  lego_duplo: "#ff4500",
+  tuna_fish_can: "#4682b4",
+  gelatin_box: "#ff69b4",
+  cracker_box: "#deb887",
+};
+
+const DEFAULT_COLOR = 0xcccccc;
+const DEFAULT_CHART_COLOR = "#cccccc";
 
 module.exports = {
   OBJECT_COLORS,
   DEFAULT_COLOR,
+  OBJECT_CHART_COLORS,
+  DEFAULT_CHART_COLOR,
 };

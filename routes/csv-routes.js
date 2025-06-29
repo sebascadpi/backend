@@ -1,13 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const csvController = require("../controllers/csv-controllers.js");
+const experimentController = require("../controllers/experiment-controllers.js");
+const chartController = require("../controllers/chart-controllers.js");
 
 const upload = multer({ dest: "uploads/" });
 
-router.post("/upload", upload.single("csvFile"), csvController.uploadCsv);
-router.get("/", csvController.getFiles);
-router.get("/:id", csvController.getFileById);
-router.get("/:id/view", csvController.getFileViewById);
+router.post(
+  "/upload",
+  upload.single("csvFile"),
+  experimentController.uploadExperimentCsv
+);
+router.get("/", experimentController.getExperiments);
+router.get("/:id", experimentController.getExperimentById);
+router.get("/:id/view", experimentController.getExperimentViewById);
+router.get("/:id/total-time-per-object", chartController.getTotalTimePerObject);
 
 module.exports = router;

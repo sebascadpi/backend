@@ -5,3 +5,10 @@ exports.timeToMS = (timeString) => {
   }
   return minutes * 60 * 1000 + seconds * 1000 + milliseconds;
 };
+
+exports.msToSeconds = (milliseconds) => {
+  if (isNaN(milliseconds)) {
+    throw new Error("Invalid milliseconds value");
+  }
+  return (milliseconds / 1000).toFixed(2);
+};
