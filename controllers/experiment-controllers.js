@@ -194,7 +194,7 @@ exports.getExperimentById = async (req, res) => {
 
     const fileData = {
       id: parsedFile.id,
-      fileName: parsedFile.fileName,
+      fileName: parsedFile.fileName.split(".")[0],
       createdAt: parsedFile.createdAt,
       updatedAt: parsedFile.updatedAt,
       experimentData,
@@ -369,7 +369,7 @@ exports.getExperimentViewById = async (req, res) => {
 
     const fileData = {
       id: parsedFile.id,
-      fileName: parsedFile.fileName,
+      fileName: parsedFile.fileName.split(".")[0],
       totalTime,
       objects: experimentObjects,
       experimentData,
