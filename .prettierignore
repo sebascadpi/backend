@@ -40,7 +40,3 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
-
-# NAX
-.lighthouseci
-/projects/nax-web-application/src/styles/03-vendors/flag-icons
