@@ -1,11 +1,11 @@
-exports.getTotalObjectTime = (experimentData, objectKey) => {
+exports.getTotalObjectTime = (experimentData, handKey) => {
   if (!experimentData.length) return {};
   let currentObject = null;
   let startTime = 0;
 
   const objectTimes = {};
   for (const frame of experimentData) {
-    const frameObject = frame[objectKey];
+    const frameObject = frame[handKey];
     const frameTime = frame.second;
 
     if (frameObject !== currentObject) {
@@ -24,14 +24,14 @@ exports.getTotalObjectTime = (experimentData, objectKey) => {
   return objectTimes;
 };
 
-exports.mapHandObjectTimeline = (experimentData, objectKey) => {
+exports.mapHandObjectTimeline = (experimentData, handKey) => {
   if (!experimentData.length) return {};
   let currentObject = null;
   let startTime = 0;
 
   const objectTimes = {};
   for (const frame of experimentData) {
-    const frameObject = frame[objectKey];
+    const frameObject = frame[handKey];
     const frameTime = frame.second;
 
     if (frameObject !== currentObject) {
@@ -39,7 +39,7 @@ exports.mapHandObjectTimeline = (experimentData, objectKey) => {
         const elapsedTime = frameTime - startTime;
         if (elapsedTime > 0)
           objectTimes[currentObject] = [
-            { x: objectKey, y: [startTime, frameTime] },
+            { x: handKey, y: [startTime, frameTime] },
           ];
       }
 
@@ -51,15 +51,15 @@ exports.mapHandObjectTimeline = (experimentData, objectKey) => {
   return objectTimes;
 };
 
-exports.mapSuccessesAndErrors = (experimentData, key) => {
+exports.mapSuccessesAndErrors = (experimentData, successOrErrorKey) => {
   if (!experimentData.length) return [];
 
   const propertyData = experimentData.map((frame) => ({
     x: frame.second,
-    y: frame[key] || 0,
+    y: frame[successOrErrorKey] || 0,
   }));
 
-  return { name: key, data: propertyData };
+  return { name: successOrErrorKey, data: propertyData };
 };
 
 exports.joinObjectTimes = (leftHandObjectTimes, rightHandObjectTimes) => {
@@ -76,18 +76,24 @@ exports.joinObjectTimes = (leftHandObjectTimes, rightHandObjectTimes) => {
   return combinedTimes;
 };
 
-exports.joinObjectTimelines = (leftHandObjectTimes, rightHandObjectTimes) => {
-  const combinedTimes = { ...leftHandObjectTimes };
+exports.joinObjectTimelines = (
+  leftHandObjectTimelines,
+  rightHandObjectTimelines
+) => {
+  const combinedHandTimelines = { ...leftHandObjectTimelines };
 
-  for (const [object, data] of Object.entries(rightHandObjectTimes)) {
-    if (combinedTimes[object]) {
-      combinedTimes[object] = [...combinedTimes[object], ...data];
+  for (const [object, data] of Object.entries(rightHandObjectTimelines)) {
+    if (combinedHandTimelines[object]) {
+      combinedHandTimelines[object] = [
+        ...combinedHandTimelines[object],
+        ...data,
+      ];
     } else {
-      combinedTimes[object] = data;
+      combinedHandTimelines[object] = data;
     }
   }
 
-  return combinedTimes;
+  return combinedHandTimelines;
 };
 
 exports.toHistogramSerie = (objectTimes) => {

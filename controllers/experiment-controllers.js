@@ -85,10 +85,8 @@ exports.getExperiments = async (req, res) => {
       const fileData = file.toJSON();
       const lastSession = fileData.SessionData[fileData.SessionData.length - 1];
 
-      // Calculate total time from the last SessionData entry
       const totalTime = lastSession ? lastSession.time : "0:0:0";
 
-      // objectPut and totalErrors
       const totalErrors = lastSession.totalErrors || 0;
       const totalObjectsPut = lastSession.objectPut || 0;
 

@@ -1,3 +1,7 @@
+const fromHexNumberToString = (color) => {
+  return `#${color.toString(16).padStart(6, "0")}`;
+};
+
 const OBJECT_COLORS = {
   orange: 0xff8c00,
   tomato_soup_can: 0xdc143c,
@@ -10,17 +14,12 @@ const OBJECT_COLORS = {
   cracker_box: 0xdeb887,
 };
 
-const OBJECT_CHART_COLORS = {
-  orange: "#ff8c00",
-  tomato_soup_can: "#dc143c",
-  master_chef_can: "#b8860b",
-  bleach_cleanser: "#87ceeb",
-  banana: "#ffd700",
-  lego_duplo: "#ff4500",
-  tuna_fish_can: "#4682b4",
-  gelatin_box: "#ff69b4",
-  cracker_box: "#deb887",
-};
+const OBJECT_CHART_COLORS = Object.fromEntries(
+  Object.entries(OBJECT_COLORS).map(([key, value]) => [
+    key,
+    fromHexNumberToString(value),
+  ])
+);
 
 const SUCCESS_ERROR_COLORS = {
   objectPut: "#00ff00",
@@ -28,7 +27,7 @@ const SUCCESS_ERROR_COLORS = {
 };
 
 const DEFAULT_COLOR = 0xcccccc;
-const DEFAULT_CHART_COLOR = "#cccccc";
+const DEFAULT_CHART_COLOR = fromHexNumberToString(DEFAULT_COLOR);
 
 module.exports = {
   OBJECT_COLORS,

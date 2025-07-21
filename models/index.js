@@ -1,8 +1,8 @@
 const { Sequelize, DataTypes } = require("sequelize");
-const config = require("../config/database.config");
+const { DATABASE_CONFIG } = require("../constants/database");
 
 const env = process.env.NODE_ENV || "development";
-const sequelize = new Sequelize(config[env]);
+const sequelize = new Sequelize(DATABASE_CONFIG[env]);
 
 // Import models
 const CsvFile = require("./csv-file")(sequelize, DataTypes);

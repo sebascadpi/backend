@@ -1,4 +1,4 @@
-module.exports = {
+const DATABASE_CONFIG = {
   development: {
     dialect: "sqlite",
     storage: "./data.sqlite",
@@ -9,4 +9,8 @@ module.exports = {
     storage: ":memory:",
     logging: false,
   },
+};
+
+module.exports = {
+  DATABASE_CONFIG,
 };
